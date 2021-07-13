@@ -161,4 +161,7 @@ $RECYCLE.BIN/
 *.lnk
 
 
+#Database Connection
+src/main/java/com/revature/utils/ConnectionUtil.java
+
 # End of https://www.gitignore.io/api/git,java,maven,eclipse,windows

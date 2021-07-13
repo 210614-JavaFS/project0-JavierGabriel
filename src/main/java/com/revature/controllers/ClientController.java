@@ -1,0 +1,274 @@
+package com.revature.controllers;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+import com.revature.models.Account;
+import com.revature.models.AccountType;
+import com.revature.models.Client;
+import com.revature.models.UserType;
+import com.revature.services.AccountService;
+import com.revature.services.ClientService;
+
+public class ClientController {
+	
+	private static Scanner scan = new Scanner(System.in);
+	private ClientService clientService = new ClientService();
+	private AccountService accountService = new AccountService();
+	
+	//LogIn or Create Account Menu
+	public Client getUser() {
+		String clientSelection;
+		System.out.println("Do you wish to log in or open a new account?\n"
+				+ "1. Log In \n"
+				+ "2. Create a new account \n"
+				+ "3. Back to user selection menu \n");
+		clientSelection = scan.nextLine();
+		Client client = null;
+		while(clientSelection != "3") {
+			
+			switch(clientSelection) {
+				case "1":
+					client = login();
+					if(client != null)
+						return client;
+					else
+						System.out.println("Invalid credentials.");
+						getUser();
+					break;
+				case "2":
+					client = newClientBuilder();
+					if(client != null) {
+						System.out.println(client);
+						//return client;
+					} else if(client == null){
+						return null;	
+					}
+					break;
+				case "3":
+					return null;
+				default:
+					System.out.println("That is not a valid choice, please try again");
+					return getUser();
+			}
+		}
+		return null;
+}
+
+	private Client newClientBuilder() {
+	//Get all data to send to user service where client will be created
+	Client client = null;
+	String user = "";
+	String pass1 = "";
+	String pass2 = "";
+	while(user.isEmpty()) {
+		System.out.println("Enter a username for your new account.");
+		user = scan.nextLine();
+	}
+	while(pass1.isEmpty()) {
+		System.out.println("Enter a password for your account.");
+		pass1 = scan.nextLine();
+	}
+	while(pass2.isEmpty()) {
+		System.out.println("Verify the password you entered previously.");
+		pass2 = scan.nextLine();
+	}
+	
+	AccountType accountType = null;
+	UserType userType = null;
+	if(pass1.compareTo(pass2) == 0) {
+		try {
+			accountType = AccountType.valueOf("Client");
+			try {
+				userType = UserType.valueOf("Client");
+				client = clientService.createNewClient(user, pass1, accountType, userType);
+			}catch(IllegalArgumentException e) {
+				client = newClientBuilder();
+			}
+			
+		}catch(IllegalArgumentException e) {
+			client = newClientBuilder();
+		}
+	}else {
+		System.out.println("Your passwords do not match. TRY AGAIN\n");
+		client = newClientBuilder();
+	}
+	
+	return client;
+	
+	
+	}
+	
+	public Client login() {
+		System.out.println("Enter your username: ");
+		String username = scan.nextLine();
+		System.out.println("Enter your password: ");
+		String password = scan.nextLine();
+		Client client = clientService.login(username, password);
+		if(client != null)
+			return client;
+		else
+			return null;
+	}
+	
+	public void clientMenu(Client client) {
+		System.out.println("Welcome back " + client.getName() + "\n");
+		if(client.getAccounts().get(0).isActive()) {
+			String response = "";
+			while(response != "5") {
+				System.out.println("What do you wish to do?\n"
+				+ "1.View Account Info\n"
+				+ "2.Withdraw\n"
+				+ "3.Deposit\n"
+				+ "4.Transfer\n"
+				+ "5.Log out\n");
+				response = scan.nextLine();
+				switch(response) {
+					case "1":
+						System.out.println(client);
+						break;
+					case "2":
+						client = withdraw(client);
+						break;
+					case "3":
+						client = deposit(client);
+						break;
+					case "4":
+						client = transfer(client);
+						break;
+					case "5":
+						return;
+					default:
+						System.out.println("Not a valid option. Try Again.\n");
+						clientMenu(client);
+				}
+			}
+			
+			
+		}
+		else {
+			String response = "";
+			while(response != "2") {
+				System.out.println("Your account aproval is pending. This might take up to 7 bussiness days. \n");
+				System.out.println("What do you wish to do?\n"
+					+ "1.Refresh\n"
+					+ "2.Log Out\n");
+				response = scan.nextLine();
+				switch(response) {
+				case "1":
+					client = clientService.login(client.getName(), client.getPassword());
+					clientMenu(client);
+					break;
+				case "2":
+					return;
+				default:
+					System.out.println("Not a valid option. Try Again\n");
+				}
+			}
+		
+		}
+	}
+	
+	
+	private Client transfer(Client client) {
+		System.out.println("How much money would you like to transfer? \n");
+		Double transfer;
+		while(!scan.hasNextDouble()) {
+			scan.next();
+			System.out.println("You must enter a valid amount. ");
+		}
+		transfer = scan.nextDouble();
+		scan.nextLine();
+		ArrayList<Account> accounts= client.getAccounts();
+		if(accounts.get(0).getCheckingsBalance() < transfer) {
+			System.out.println("Insuficient funds");
+			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			return client;
+		}
+		else if(transfer < 0) {
+			System.out.println("Must enter a positive amount to withdraw.");
+			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			return client;
+		}
+		else {
+			//transfer
+			System.out.println("Which user would you like to transfer money to? \n");
+			String receiver = scan.nextLine();
+			ArrayList<String> users = clientService.getUsernames();
+			
+			if(users.contains(receiver)) {
+				//Process transfer
+				Double newBalance = accountService.transfer(client.getName(), receiver, transfer);
+				System.out.println("You transfered " + receiver + " $" + transfer);
+				System.out.println("Current Balance: $" + newBalance + "\n");
+				accounts.get(0).setCheckingsBalance(newBalance);
+				client.setAccounts(accounts);
+				return client;
+			}else {
+				System.out.println("The user you entered does not exists");
+				return client;
+			}
+		}
+	}
+
+	private Client deposit(Client client) {
+		System.out.println("How much would you like to deposit? \n");
+		Double deposit;
+		while(!scan.hasNextDouble()) {
+			scan.next();
+			System.out.println("You must enter a valid amount. ");
+		}
+		deposit = scan.nextDouble();
+		scan.nextLine();
+		ArrayList<Account> accounts= client.getAccounts();
+		if(deposit <= 0 ) {
+			System.out.println("Nothing was deposited");
+			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			return client;
+		}
+		else if(deposit < 0) {
+			System.out.println("Must enter a positive amount to deposit.");
+			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			return client;
+		}
+		else {
+			Double newBalance = accountService.deposit(accounts.get(0).getAccountNumber(), deposit);
+			System.out.println("You deposited $" + deposit);
+			System.out.println("Current Balance: $" + newBalance + "\n");
+			accounts.get(0).setCheckingsBalance(newBalance);
+			client.setAccounts(accounts);
+			return client;
+		}
+	}
+
+	public Client withdraw(Client client) {
+		System.out.println("How much would you like to withdraw? \n");
+		Double withdrawal;
+		while(!scan.hasNextDouble()) {
+			scan.next();
+			System.out.println("You must enter a valid amount. ");
+		}
+		withdrawal = scan.nextDouble();
+		scan.nextLine();
+		ArrayList<Account> accounts= client.getAccounts();
+		if(accounts.get(0).getCheckingsBalance() < withdrawal) {
+			System.out.println("Insuficient funds");
+			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			return client;
+		}
+		else if(withdrawal < 0) {
+			System.out.println("Must enter a positive amount to withdraw.");
+			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			return client;
+		}
+		else {
+			Double newBalance = accountService.withdraw(accounts.get(0).getAccountNumber(), withdrawal);
+			System.out.println("You withdrew $" + withdrawal);
+			System.out.println("Current Balance: $" + newBalance + "\n");
+			accounts.get(0).setCheckingsBalance(newBalance);
+			client.setAccounts(accounts);
+			return client;
+		}
+	}
+
+}
