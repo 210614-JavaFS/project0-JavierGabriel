@@ -1,5 +1,7 @@
 package com.revature.models;
 
+import java.text.DecimalFormat;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +11,7 @@ public class Account {
 	private double checkingsBalance;
 	private boolean active;
 	private AccountType accountType;
+	private DecimalFormat df = new DecimalFormat("#,##0.00");
 	private static Logger log = LoggerFactory.getLogger(Account.class);
 	
 	public Account(String accountNumber, double checkingsBalance, boolean active) {
@@ -97,7 +100,7 @@ public class Account {
 
 	@Override
 	public String toString() {
-		return "\n accountNumber:" + accountNumber + "\n checkingsBalance: $" + checkingsBalance + "\n active:"
+		return "\n accountNumber:" + accountNumber + "\n checkingsBalance: $" + df.format(checkingsBalance) + "\n active:"
 				+ active + "\n accountType:" + accountType;
 	}
 	

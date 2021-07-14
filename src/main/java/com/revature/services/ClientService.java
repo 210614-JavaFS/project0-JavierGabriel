@@ -16,8 +16,13 @@ public class ClientService {
 	
 	public Client createNewClient(String username, String password, AccountType accountType, UserType userType) {
 		Account account = accountService.generateNewAccount(accountType);
-		
-		return new Client(username, password, userType, account);
+		Client client = new Client(username, password, userType, account);
+		if(clientDao.addClient(client)) {
+			return client;
+		}else {
+			return null;
+		}
+			
 		
 	}
 	
@@ -33,6 +38,10 @@ public class ClientService {
 	
 	public ArrayList<String> getUsernames(){
 		return clientDao.getAllClientUsernames();
+	}
+	
+	public Client getClient(String username) {
+		return clientDao.findClient(username);
 	}
 	
 }

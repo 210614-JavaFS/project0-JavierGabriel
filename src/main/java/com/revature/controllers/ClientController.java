@@ -1,5 +1,6 @@
 package com.revature.controllers;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -15,6 +16,7 @@ public class ClientController {
 	private static Scanner scan = new Scanner(System.in);
 	private ClientService clientService = new ClientService();
 	private AccountService accountService = new AccountService();
+	private DecimalFormat df = new DecimalFormat("#,###.00");
 	
 	//LogIn or Create Account Menu
 	public Client getUser() {
@@ -22,7 +24,7 @@ public class ClientController {
 		System.out.println("Do you wish to log in or open a new account?\n"
 				+ "1. Log In \n"
 				+ "2. Create a new account \n"
-				+ "3. Back to user selection menu \n");
+				+ "3. Back to user selection menu ");
 		clientSelection = scan.nextLine();
 		Client client = null;
 		while(clientSelection != "3") {
@@ -30,19 +32,20 @@ public class ClientController {
 			switch(clientSelection) {
 				case "1":
 					client = login();
-					if(client != null)
+					if(client != null  && client.getUserType().toString().equals("Client"))
 						return client;
 					else
-						System.out.println("Invalid credentials.");
-						getUser();
-					break;
+						System.out.println("Invalid credentials.\n");
+						return getUser();
 				case "2":
 					client = newClientBuilder();
 					if(client != null) {
 						System.out.println(client);
-						//return client;
+						System.out.println("Your account was created succesfully!");
+						return client;
 					} else if(client == null){
-						return null;	
+						System.out.println("Error creating account. Try Again\n");
+						return getUser();	
 					}
 					break;
 				case "3":
@@ -112,8 +115,8 @@ public class ClientController {
 	}
 	
 	public void clientMenu(Client client) {
-		System.out.println("Welcome back " + client.getName() + "\n");
-		if(client.getAccounts().get(0).isActive()) {
+		System.out.println("\nWelcome back " + client.getName() + "\n");
+		if(client.getAccount() != null && client.getAccounts().get(0).isActive()) {
 			String response = "";
 			while(response != "5") {
 				System.out.println("What do you wish to do?\n"
@@ -121,20 +124,20 @@ public class ClientController {
 				+ "2.Withdraw\n"
 				+ "3.Deposit\n"
 				+ "4.Transfer\n"
-				+ "5.Log out\n");
+				+ "5.Log out");
 				response = scan.nextLine();
 				switch(response) {
 					case "1":
-						System.out.println(client);
+						System.out.println(clientService.login(client.getName(), client.getPassword()));
 						break;
 					case "2":
-						client = withdraw(client);
+						client = withdraw(clientService.login(client.getName(), client.getPassword()));
 						break;
 					case "3":
-						client = deposit(client);
+						client = deposit(clientService.login(client.getName(), client.getPassword()));
 						break;
 					case "4":
-						client = transfer(client);
+						client = transfer(clientService.login(client.getName(), client.getPassword()));
 						break;
 					case "5":
 						return;
@@ -146,19 +149,19 @@ public class ClientController {
 			
 			
 		}
-		else {
+		else if(client.getAccount() != null && !client.getAccounts().get(0).isActive()){
 			String response = "";
 			while(response != "2") {
-				System.out.println("Your account aproval is pending. This might take up to 7 bussiness days. \n");
+				System.out.println("Your account approval is pending. This might take up to 7 bussiness days. \n");
 				System.out.println("What do you wish to do?\n"
 					+ "1.Refresh\n"
-					+ "2.Log Out\n");
+					+ "2.Log Out");
 				response = scan.nextLine();
 				switch(response) {
 				case "1":
 					client = clientService.login(client.getName(), client.getPassword());
 					clientMenu(client);
-					break;
+					return;
 				case "2":
 					return;
 				default:
@@ -166,6 +169,39 @@ public class ClientController {
 				}
 			}
 		
+		}
+		else if(client.getAccount() == null){
+			String response = "";
+			while(response != "3") {
+				System.out.println("Your account has been canceled. \n");
+				System.out.println("What do you wish to do?\n"
+					+ "1.Refresh\n"
+					+ "2.Apply for new Account\n"
+					+ "3.Log Out");
+				response = scan.nextLine();
+				switch(response) {
+					case "1":
+						client = clientService.login(client.getName(), client.getPassword());
+						clientMenu(client);
+						return;
+					case "2":
+						if(accountService.accountApply(client.getName())) {
+							System.out.println("You've applied successfully for an account.");
+							client = clientService.login(client.getName(), client.getPassword());
+							clientMenu(client);
+						}
+						else {
+							System.out.println("An error occured during your application. Try Again");
+							client = clientService.login(client.getName(), client.getPassword());
+							clientMenu(client);
+						}
+						return;
+					case "3":
+						return;
+					default:
+						System.out.println("Not a valid option. Try Again\n");
+				}
+			}
 		}
 	}
 	
@@ -199,8 +235,8 @@ public class ClientController {
 			if(users.contains(receiver)) {
 				//Process transfer
 				Double newBalance = accountService.transfer(client.getName(), receiver, transfer);
-				System.out.println("You transfered " + receiver + " $" + transfer);
-				System.out.println("Current Balance: $" + newBalance + "\n");
+				System.out.println("You transfered " + receiver + " $" + df.format(transfer));
+				System.out.println("Current Balance: $" + df.format(newBalance) + "\n");
 				accounts.get(0).setCheckingsBalance(newBalance);
 				client.setAccounts(accounts);
 				return client;
@@ -233,8 +269,8 @@ public class ClientController {
 		}
 		else {
 			Double newBalance = accountService.deposit(accounts.get(0).getAccountNumber(), deposit);
-			System.out.println("You deposited $" + deposit);
-			System.out.println("Current Balance: $" + newBalance + "\n");
+			System.out.println("You deposited $" + df.format(deposit));
+			System.out.println("Current Balance: $" + df.format(newBalance) + "\n");
 			accounts.get(0).setCheckingsBalance(newBalance);
 			client.setAccounts(accounts);
 			return client;

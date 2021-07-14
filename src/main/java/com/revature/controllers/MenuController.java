@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import com.revature.models.AccountType;
 import com.revature.models.Client;
+import com.revature.models.Employee;
 import com.revature.models.User;
 import com.revature.models.UserType;
 import com.revature.services.ClientService;
@@ -19,28 +20,36 @@ public class MenuController {
 	 
 	public static void menu() {	
 		String userType = "";		
-		while(!userType.equalsIgnoreCase("quit")) {
+		while(!userType.equalsIgnoreCase("3")) {
 			System.out.println("Welcome to Phoenix Banking System. \n");
 			System.out.println("What type of user are you? \n"
-				+ "Client \n"
-				+ "Employee \n"
-				+ "Quit \n");
+				+ "1.Client \n"
+				+ "2.Employee \n"
+				+ "3.Quit");
 			userType = scan.nextLine();
 			switch(userType.toLowerCase()) {
-				case "client":
+				case "1":
 					Client client = clientController.getUser();
 					if(client != null) {
 						clientController.clientMenu(client);
 					}
 					break;
-				case "employee":
-					System.out.println("Welcome back employee. What do you want to do? \n");
-					employeeController.employeeMenu();
-					menu();
+				case "2":
+					Employee employee = employeeController.login();
+					if(employee != null && employee.getUserType().toString().equals("Employee")) {
+						employeeController.employeeMenu(employee);
+					}
+					else if(employee != null && employee.getUserType().toString().equals("Administrator")) {
+						employeeController.AdminMenu(employee);
+					}
+					else {
+						System.out.println("Invalid Credentials");
+					}
 					break;
-				case "quit":
+				case "3":
 					return;
 				default:
+					System.out.println("Not a valid option. Try again\n");
 					break;
 			}
 		}

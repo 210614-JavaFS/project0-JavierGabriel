@@ -254,4 +254,64 @@ public class AccountDAOImpl implements AccountDAO {
 		return 0;
 	}
 
+	@Override
+	public boolean activateAccount(String username) {
+		try(Connection conn = ConnectionUtil.getConnection()){
+			String sql = "UPDATE accounts SET active = TRUE WHERE account_user= ? ;";
+			
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			statement.setString(1, username);
+			
+			statement.execute();
+			
+			return true;
+			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+
+	@Override
+	public boolean deactivateAccount(String username) {
+		try(Connection conn = ConnectionUtil.getConnection()){
+			String sql = "UPDATE accounts SET active = FALSE WHERE account_user= ? ;";
+			
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			statement.setString(1, username);
+			
+			statement.execute();
+			
+			return true;
+			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+
+	@Override
+	public boolean deleteAccount(String account) {
+		try(Connection conn = ConnectionUtil.getConnection()){
+			String sql = "DELETE FROM accounts WHERE account_number= ? ;";
+			
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			statement.setString(1, account);
+			
+			statement.execute();
+			
+			return true;
+			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+
 }

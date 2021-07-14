@@ -23,6 +23,13 @@ public class Client extends User{
 	public ArrayList<Account> getAccounts() {
 		return accounts;
 	}
+	
+	public Account getAccount() {
+		if(accounts.isEmpty()) {
+			return null;
+		}
+		return accounts.get(0);
+	}
 
 
 	public void setAccounts(ArrayList<Account> accounts) {
@@ -32,6 +39,8 @@ public class Client extends User{
 	public void addAccount(Account account) {
 		this.accounts.add(account);
 	}
+	
+	
 
 
 

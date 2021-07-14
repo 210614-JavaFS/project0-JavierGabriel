@@ -53,7 +53,36 @@ public class ClientDAOImpl implements ClientDAO {
 
 	@Override
 	public Client findClient(String username) {
-		// TODO Auto-generated method stub
+		try(Connection conn = ConnectionUtil.getConnection()){
+			String sql = "SELECT * FROM users WHERE username = ? AND user_type='Client' ;";
+			
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			statement.setString(1, username);
+			
+			ResultSet result = statement.executeQuery();
+			
+			Client client = new Client();
+			
+			//ResultSets have a cursor similarly to Scanners or other I/O classes. 
+			while(result.next()) {
+				client.setName(result.getString("username"));
+				client.setPassword(result.getString("user_pass"));
+				try {
+					client.setUserType(UserType.valueOf(result.getString("user_type")));
+				}catch(IllegalArgumentException e) {
+					e.printStackTrace();
+				}
+				//TODO: Get accounts lists using AccountDAO
+				client.setAccounts(accountDao.findByUser(client.getName()));
+			}
+			if(client.getName() == null)
+				client = null;
+			return client;
+			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -69,10 +98,11 @@ public class ClientDAOImpl implements ClientDAO {
 			statement.setString(++index, client.getName());
 			statement.setString(++index, client.getPassword());
 			statement.setString(++index, client.getUserType().toString());
+			statement.execute();
 			for(Account account: client.getAccounts()) {
 				accountDao.addAccount(account, client.getName());
 			}
-			statement.execute();
+			
 			
 			return true;
 			
@@ -145,5 +175,7 @@ public class ClientDAOImpl implements ClientDAO {
 		}
 		return null;
 	}
+	
+	
 
 }

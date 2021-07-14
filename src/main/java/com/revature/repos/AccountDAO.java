@@ -18,4 +18,7 @@ public interface AccountDAO {
 	public double transfer(String sender, String receiver, double amount);
 	public double depositByUser(String account, double amount);
 	public double withdrawByUser(String account, double amount);
+	public boolean activateAccount(String username);
+	public boolean deactivateAccount(String username);
+	public boolean deleteAccount(String account);
 }
