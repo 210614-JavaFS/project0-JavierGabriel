@@ -16,7 +16,7 @@ public class ClientController {
 	private static Scanner scan = new Scanner(System.in);
 	private ClientService clientService = new ClientService();
 	private AccountService accountService = new AccountService();
-	private DecimalFormat df = new DecimalFormat("#,###.00");
+	private DecimalFormat df = new DecimalFormat("#,##0.00");
 	
 	//LogIn or Create Account Menu
 	public Client getUser() {
@@ -60,14 +60,22 @@ public class ClientController {
 
 	private Client newClientBuilder() {
 	//Get all data to send to user service where client will be created
+		ArrayList<Client> clients = clientService.getAllClients();
+		ArrayList<String> usernames = new ArrayList<>();
+		for(Client client: clients) {
+			usernames.add(client.getName());
+		}
 	Client client = null;
 	String user = "";
 	String pass1 = "";
 	String pass2 = "";
-	while(user.isEmpty()) {
+	do{
+		if(usernames.contains(user)) {
+			System.out.println("Username already in use.");
+		}
 		System.out.println("Enter a username for your new account.");
 		user = scan.nextLine();
-	}
+	}while(user.isEmpty() || usernames.contains(user));
 	while(pass1.isEmpty()) {
 		System.out.println("Enter a password for your account.");
 		pass1 = scan.nextLine();
@@ -218,12 +226,12 @@ public class ClientController {
 		ArrayList<Account> accounts= client.getAccounts();
 		if(accounts.get(0).getCheckingsBalance() < transfer) {
 			System.out.println("Insuficient funds");
-			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			System.out.println("Current Balance: $" + df.format(accounts.get(0).getCheckingsBalance()) + "\n");
 			return client;
 		}
 		else if(transfer < 0) {
 			System.out.println("Must enter a positive amount to withdraw.");
-			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			System.out.println("Current Balance: $" + df.format(accounts.get(0).getCheckingsBalance()) + "\n");
 			return client;
 		}
 		else {
@@ -259,12 +267,12 @@ public class ClientController {
 		ArrayList<Account> accounts= client.getAccounts();
 		if(deposit <= 0 ) {
 			System.out.println("Nothing was deposited");
-			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			System.out.println("Current Balance: $" + df.format(accounts.get(0).getCheckingsBalance()) + "\n");
 			return client;
 		}
 		else if(deposit < 0) {
 			System.out.println("Must enter a positive amount to deposit.");
-			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			System.out.println("Current Balance: $" + df.format(accounts.get(0).getCheckingsBalance()) + "\n");
 			return client;
 		}
 		else {
@@ -289,18 +297,18 @@ public class ClientController {
 		ArrayList<Account> accounts= client.getAccounts();
 		if(accounts.get(0).getCheckingsBalance() < withdrawal) {
 			System.out.println("Insuficient funds");
-			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			System.out.println("Current Balance: $" + df.format(accounts.get(0).getCheckingsBalance()) + "\n");
 			return client;
 		}
 		else if(withdrawal < 0) {
 			System.out.println("Must enter a positive amount to withdraw.");
-			System.out.println("Current Balance: $" + accounts.get(0).getCheckingsBalance() + "\n");
+			System.out.println("Current Balance: $" + df.format(accounts.get(0).getCheckingsBalance()) + "\n");
 			return client;
 		}
 		else {
 			Double newBalance = accountService.withdraw(accounts.get(0).getAccountNumber(), withdrawal);
-			System.out.println("You withdrew $" + withdrawal);
-			System.out.println("Current Balance: $" + newBalance + "\n");
+			System.out.println("You withdrew $" + df.format(withdrawal));
+			System.out.println("Current Balance: $" + df.format(newBalance) + "\n");
 			accounts.get(0).setCheckingsBalance(newBalance);
 			client.setAccounts(accounts);
 			return client;

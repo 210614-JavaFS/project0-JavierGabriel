@@ -90,12 +90,12 @@ public class AccountService {
 	}
 	//Returns new balance
 	public double deposit(String account, double amount) {
-		log.info("$" + amount +" was deposited into account #"+ account);
+		log.info("$" + amount +" was deposited into account # "+ account);
 		return accountDao.deposit(account, amount);
 	}
 	
 	public double transfer(String sender, String receiver, double amount) {
-		log.info(sender +" transfered $"+amount+"to"+ receiver + ".");
+		log.info(sender +" transfered $"+amount+" to "+ receiver + ".");
 		return accountDao.transfer(sender, receiver , amount);
 	}
 	

@@ -17,7 +17,7 @@ public class EmployeeController {
 	private ClientService clientService = new ClientService();
 	private AccountService accountService = new AccountService();
 	private EmployeeService employeeService = new EmployeeService();
-	private DecimalFormat df = new DecimalFormat("#,###.00");
+	private DecimalFormat df = new DecimalFormat("#,##0.00");
 
 	public void employeeMenu(Employee employee) {
 		String response = "";
@@ -168,7 +168,7 @@ public class EmployeeController {
 				usernames.add(client.getName());
 			}
 			System.out.println("Clients waiting for account approval:\n" + clients);
-			System.out.println("Enter the username of account you wish to approve:");
+			System.out.println("Enter the username of account you wish to approve/deny:");
 			String username = scan.nextLine();
 			if(!usernames.contains(username)) {
 				System.out.println("That user does not exist or is not in the list. Try again");
@@ -181,7 +181,7 @@ public class EmployeeController {
 					System.out.println("Enter your decision: (approve/deny)");
 					decision = scan.nextLine();
 					if(decision.toLowerCase().equals("approve") && accountService.activateAccount(username)) {
-						System.out.println(username + "'s account application has been denied.");
+						System.out.println(username + "'s account application has been approved.");
 					}
 					else if(decision.toLowerCase().equals("deny") && accountService.deleteAccount(client.getAccount().getAccountNumber())) {
 						System.out.println(username + "'s account application has been denied.");
