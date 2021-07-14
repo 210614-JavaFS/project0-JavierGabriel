@@ -9,4 +9,7 @@ public class EmployeeService {
 	public Employee login(String username, String password) {
 		return employeeDao.login(username, password);
 	}
+	public boolean createEmployee(String username, String password) {
+		return employeeDao.createEmployee(username, password);
+	}
 }

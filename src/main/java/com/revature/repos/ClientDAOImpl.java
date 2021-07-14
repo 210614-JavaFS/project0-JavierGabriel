@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.revature.models.Account;
 import com.revature.models.Client;
+import com.revature.models.User;
 import com.revature.models.UserType;
 import com.revature.utils.ConnectionUtil;
 
@@ -155,6 +156,31 @@ public class ClientDAOImpl implements ClientDAO {
 	public ArrayList<String> getAllClientUsernames() {
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "SELECT username FROM users WHERE user_type = 'Client';";
+			
+			Statement statement = conn.createStatement();
+			
+			ResultSet result = statement.executeQuery(sql);
+			
+			ArrayList<String> list = new ArrayList<>();
+			
+			//ResultSets have a cursor similarly to Scanners or other I/O classes. 
+			while(result.next()) {
+				String username = new String(result.getString("username"));
+				list.add(username);
+			}
+			
+			return list;
+			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public ArrayList<String> findAllUsers() {
+		try(Connection conn = ConnectionUtil.getConnection()){
+			String sql = "SELECT username FROM users;";
 			
 			Statement statement = conn.createStatement();
 			

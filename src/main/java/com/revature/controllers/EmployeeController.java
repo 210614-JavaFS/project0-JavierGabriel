@@ -52,12 +52,13 @@ public class EmployeeController {
 	public void AdminMenu(Employee employee) {
 		String response = "";
 		System.out.println("\nWelcome back " + employee.getName() + ". What do you want to do?");
-		while(response != "4") {
+		while(response != "5") {
 			System.out.println("\nAdmin Menu:\n"
 					+ "1.View all users account information \n"
 					+ "2.Search and edit account for a specific user\n"
 					+ "3.Approve/Deny a customer account application\n"
-					+ "4.Log out \n");
+					+ "4.Create Employee Account\n"
+					+ "5.Log out \n");
 			response = scan.nextLine();
 			switch(response) {
 			case "1":
@@ -71,6 +72,9 @@ public class EmployeeController {
 				approveClient();
 				break;
 			case "4":
+				createEmployee();
+				break;
+			case "5":
 				return;
 			default:
 				System.out.println("That is not a valid option. Please try again..\n");
@@ -79,6 +83,38 @@ public class EmployeeController {
 		}	
 	}
 	
+	private void createEmployee() {
+		ArrayList<String> usernames = clientService.findAllUsernames();
+		String user = "";
+		String pass1 = "";
+		String pass2 = "";
+		do{
+			if(usernames.contains(user)) {
+				System.out.println("Username already in use.");
+			}
+			System.out.println("Enter a username for your new account.");
+			user = scan.nextLine();
+		}while(user.isEmpty() || usernames.contains(user));
+		while(pass1.isEmpty()) {
+			System.out.println("Enter a password for your account.");
+			pass1 = scan.nextLine();
+		}
+		while(pass2.isEmpty()) {
+			System.out.println("Verify the password you entered previously.");
+			pass2 = scan.nextLine();
+		}
+		
+		if(pass1.compareTo(pass2) == 0) {
+			if(employeeService.createEmployee(user, pass1)) {
+				System.out.println("Employee account created successfully");
+			}
+		}else {
+			System.out.println("Your passwords do not match. TRY AGAIN\n");
+			return;
+		}
+		
+	}
+
 	public void getClientAdmin() {
 		System.out.println("Enter client username: ");
 		String username = scan.nextLine();

@@ -44,4 +44,8 @@ public class ClientService {
 		return clientDao.findClient(username);
 	}
 	
+	public ArrayList<String> findAllUsernames(){
+		return clientDao.findAllUsers();
+	}
+	
 }

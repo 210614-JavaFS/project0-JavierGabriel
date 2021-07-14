@@ -60,11 +60,11 @@ public class ClientController {
 
 	private Client newClientBuilder() {
 	//Get all data to send to user service where client will be created
-		ArrayList<Client> clients = clientService.getAllClients();
-		ArrayList<String> usernames = new ArrayList<>();
-		for(Client client: clients) {
-			usernames.add(client.getName());
-		}
+//		ArrayList<Client> clients = clientService.getAllClients();
+		ArrayList<String> usernames = clientService.findAllUsernames();
+//		for(Client client: clients) {
+//			usernames.add(client.getName());
+//		}
 	Client client = null;
 	String user = "";
 	String pass1 = "";

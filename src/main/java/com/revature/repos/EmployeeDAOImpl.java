@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.revature.models.Account;
 import com.revature.models.Client;
 import com.revature.models.Employee;
 import com.revature.models.UserType;
@@ -47,6 +48,28 @@ public class EmployeeDAOImpl implements EmployeeDAO {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	@Override
+	public boolean createEmployee(String username, String password) {
+		try (Connection conn = ConnectionUtil.getConnection()){
+			String sql = "INSERT INTO users (username, user_pass, user_type)"
+					+ " VALUES (?,?,?);";
+			
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			int index = 0;
+			statement.setString(++index, username);
+			statement.setString(++index, password);
+			statement.setString(++index, "Employee");
+			statement.execute();
+			
+			return true;
+			
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 }
